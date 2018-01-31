@@ -1,2 +1,2 @@
 # cyclegan-keras
-keras implementation of cycle-gan
+ongoing keras implementation of cycle-gan
