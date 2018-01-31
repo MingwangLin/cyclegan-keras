@@ -57,7 +57,7 @@ def resnet_generator(arr):
 
 
 # Defines the PatchGAN discriminator
-def NLayerDiscriminator(arr):
+def three_Layer_discriminator(arr):
     inp = Input(arr.shape[1:])
     x = ZeroPadding2D(padding=(1, 1))(inp)
     x = conv_block(x, 64, 4, (2, 2), has_norm_layer=False, is_leaky_relu=True)
