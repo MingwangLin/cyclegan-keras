@@ -18,9 +18,9 @@ def batchnorm():
                               gamma_initializer=RandomNormal(1., 0.02))
 
 
-def conv_block(x, filters, size, stride=(2, 2), use_norm_layer=True, use_norm_instance=False,
+def conv_block(x, nf, size, stride=(2, 2), use_norm_layer=True, use_norm_instance=False,
                use_activation_function=True, use_leaky_relu=True):
-    x = conv2d(filters, (size, size), strides=stride)(x)
+    x = conv2d(nf, (size, size), strides=stride)(x)
     if use_norm_layer:
         if not use_norm_instance:
             x = batchnorm()(x, training=1)
@@ -43,15 +43,15 @@ def res_block(ip, nf=256):
     return add([x, ip])
 
 
-def up_block(x, filters, size, use_conv_transpose=True, use_norm_instance=False):
+def up_block(x, nf, size, use_conv_transpose=True, use_norm_instance=False):
     if use_conv_transpose:
-        x = Conv2DTranspose(filters, kernel_size=size, strides=2, padding='same',
+        x = Conv2DTranspose(nf, kernel_size=size, strides=2, padding='same',
                             use_bias=True if use_norm_instance else False,
                             kernel_initializer=RandomNormal(0, 0.02))(x)
     else:
         x = UpSampling2D()(x)
         x = ZeroPadding2D(padding=(1, 1))(x)
-        x = conv2d(filters, (size, size), strides=(1, 1))(x)
+        x = conv2d(nf, (size, size), strides=(1, 1))(x)
 
     x = batchnorm()(x, training=1)
     x = Activation('relu')(x)
@@ -92,8 +92,8 @@ def n_layer_discriminator(input_nc=3, ndf=64, hidden_layers=2):
     x = conv_block(x, ndf, 4, use_norm_layer=False)
     x = ZeroPadding2D(padding=(1, 1))(x)
     for i in range(1, hidden_layers + 1):
-        filters = 2 ** i * ndf
-        x = conv_block(x, filters, 4)
+        nf = 2 ** i * ndf
+        x = conv_block(x, nf, 4)
         x = ZeroPadding2D(padding=(1, 1))(x)
     x = conv2d(1, (4, 4), activation='sigmoid', strides=(1, 1))(x)
     outputs = x
