@@ -70,11 +70,9 @@ def resnet_generator(img_size=256, input_nc=3, res_blocks=9):
     x = conv_block(x, 256, 3, (2, 2))
     for i in range(res_blocks):
         x = res_block(x)
-        # x = res_block(x, nf=128)
     x = up_block(x, 128, 3)
     x = up_block(x, 64, 3)
     x = ZeroPadding2D(padding=(3, 3))(x)
-    # x = ZeroPadding2D(padding=(1, 1))(x)
     x = conv2d(3, (7, 7), activation='tanh', strides=(1, 1))(x)
     outputs = x
     return Model(inputs=inputs, outputs=[outputs])
