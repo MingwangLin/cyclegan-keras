@@ -97,4 +97,4 @@ def n_layer_discriminator(input_nc=3, ndf=64, hidden_layers=2):
         x = ZeroPadding2D(padding=(1, 1))(x)
     x = conv2d(1, (4, 4), activation='sigmoid', strides=(1, 1))(x)
     outputs = x
-    return Model(inputs=[inputs], outputs=outputs)
+    return Model(inputs=inputs, outputs=outputs)
