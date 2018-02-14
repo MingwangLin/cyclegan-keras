@@ -1,4 +1,3 @@
-import numpy as np
 import torch
 import os
 import itertools
@@ -22,6 +21,7 @@ class KerasCycleGAN:
 
         self.D_B = n_layer_discriminator()
         self.D_A = n_layer_discriminator()
+        self.save_dir = os.path.join(opt.checkpoints_dir, opt.name)
 
     def set_input(self, input):
         AtoB = self.opt.which_direction == 'AtoB'
@@ -94,11 +94,12 @@ class KerasCycleGAN:
         weights_D = self.D_A.trainable_weights + self.D_B.trainable_weights
         weights_G = self.G_A.trainable_weights + self.G_B.trainable_weights
 
-        training_updates = Adam(lr=2e-4, beta_1=0.5).get_updates(weights_D, [], loss_D)
+        training_updates = Adam(lr=self.opt.lr, beta1=self.opt.beta1).get_updates(weights_D, [], loss_D)
         D_backward = K.function([real_A, real_B], [loss_DA / 2, loss_DB / 2], training_updates)
 
-        training_updates = Adam(lr=2e-4, beta_1=0.5).get_updates(weights_G, [], loss_G)
+        training_updates = Adam(lr=self.opt.lr, beta_1=self.opt.beta1).get_updates(weights_G, [], loss_G)
         G_backward = K.function([real_A, real_B], [loss_GA, loss_GB, loss_cyc], training_updates)
+
         return G_backward, D_backward
 
     def optimize_parameters(self):
