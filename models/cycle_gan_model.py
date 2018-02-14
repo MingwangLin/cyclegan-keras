@@ -115,10 +115,17 @@ class KerasCycleGAN:
         save_filename = '{}_{}_GA.hdf5'.format(epoch_count, iter_count)
         save_path = os.path.join(self.save_dir, save_filename)
         self.G_A.save(save_path)
+
+        save_filename = '{}_{}_GA.json'.format(epoch_count, iter_count)
+        save_path = os.path.join(self.save_dir, save_filename)
+        with open(save_path, 'w') as f:
+            f.write(self.G_A.to_json())
+
         save_filename = '{}_{}_GA_weights.hdf5'.format(epoch_count, iter_count)
         save_path = os.path.join(self.save_dir, save_filename)
-        self.G_A.save_weights(save_path + 'model_weights.hdf5')
-        save_filename = '{}_{}_GA.json'.format(epoch_count, iter_count)
+        self.G_A.save_weights(save_path)
+
+        save_filename = '{}_{}_GA_weights.json'.format(epoch_count, iter_count)
         save_path = os.path.join(self.save_dir, save_filename)
         with open(save_path, 'w') as f:
             f.write(self.G_A.to_json())
