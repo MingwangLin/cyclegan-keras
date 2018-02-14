@@ -27,8 +27,8 @@ class KerasCycleGAN:
         AtoB = self.opt.which_direction == 'AtoB'
         input_A = input['A' if AtoB else 'B']
         input_B = input['B' if AtoB else 'A']
-        input_A = input_A.numpy().istype('float32')
-        input_B = input_B.numpy().istype('float32')
+        input_A = input_A.numpy().astype('float32')
+        input_B = input_B.numpy().astype('float32')
         self.real_A = input_A
         self.real_B = input_B
         self.image_paths = input['A_paths' if AtoB else 'B_paths']
