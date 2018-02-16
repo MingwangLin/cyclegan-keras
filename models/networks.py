@@ -81,7 +81,7 @@ def resnet_generator(img_size=256, input_nc=3, res_blocks=9):
 
 
 # Defines the PatchGAN discriminator
-def _n_layer_discriminator(input_nc=3, ndf=64, hidden_layers=2):
+def n_layer_discriminator(input_nc=3, ndf=64, hidden_layers=2):
     """
         input_nc: input channels
         ndf: filters of the first layer
@@ -102,34 +102,3 @@ def _n_layer_discriminator(input_nc=3, ndf=64, hidden_layers=2):
     return Model(inputs=inputs, outputs=outputs)
 
 
-def n_layer_discriminator(nc_in=3, ndf=64, max_layers=2, use_sigmoid=True):
-    """DCGAN_D(nc, ndf, max_layers=3)
-       nc: channels
-       ndf: filters of the first layer
-       max_layers: max hidden layers
-    """
-    input_a = Input(shape=(None, None, nc_in))
-    _ = input_a
-    _ = conv2d(ndf, kernel_size=4, strides=2, padding="same", name='First')(_)
-    _ = LeakyReLU(alpha=0.2)(_)
-
-    for layer in range(1, max_layers):
-        out_feat = ndf * min(2 ** layer, 8)
-        _ = conv2d(out_feat, kernel_size=4, strides=2, padding="same",
-                   use_bias=False, name='pyramid.{0}'.format(layer)
-                   )(_)
-        _ = batchnorm()(_, training=1)
-        _ = LeakyReLU(alpha=0.2)(_)
-
-    out_feat = ndf * min(2 ** max_layers, 8)
-    _ = ZeroPadding2D(1)(_)
-    _ = conv2d(out_feat, kernel_size=4, use_bias=False, name='pyramid_last')(_)
-    _ = batchnorm()(_, training=1)
-    _ = LeakyReLU(alpha=0.2)(_)
-
-    # final layer
-    _ = ZeroPadding2D(1)(_)
-    _ = conv2d(1, kernel_size=4, name='final'.format(out_feat, 1),
-               activation="sigmoid" if use_sigmoid else None)(_)
-    print('outputs', _.shape)
-    return Model(inputs=[input_a], outputs=_)
