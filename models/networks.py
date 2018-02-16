@@ -62,7 +62,9 @@ def up_block(x, nf, size, use_conv_transpose=False, use_norm_instance=False):
 def resnet_generator(img_size=256, input_nc=3, res_blocks=9):
     inputs = Input(shape=(img_size, img_size, input_nc))
     x = inputs
+    print('x1', x.shape)
     x = ZeroPadding2D(padding=(3, 3))(x)
+    print('x2', x.shape)
     x = conv_block(x, 64, 7, (1, 1))
     x = ZeroPadding2D(padding=(1, 1))(x)
     x = conv_block(x, 128, 3, (2, 2))
