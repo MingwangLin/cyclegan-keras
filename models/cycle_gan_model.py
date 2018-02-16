@@ -72,6 +72,7 @@ class KerasCycleGAN:
         fake_output = G_A.output[0]
         print('--------fake_output---------', fake_output)
         rec_input = G_B([fake_output])
+        print('---------hit---------')
         return real_input, fake_output, rec_input
 
     def G_B_forward(self, G_B, G_A):
