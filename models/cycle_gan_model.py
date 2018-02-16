@@ -75,6 +75,7 @@ class KerasCycleGAN:
 
     def G_B_forward(self, G_B, G_A):
         real_input = self.real_B
+        print('real_input', real_input.shape)
         fake_output = G_B([real_input])
         rec_input = G_A([fake_output])
         return real_input, fake_output, rec_input
