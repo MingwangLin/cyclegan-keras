@@ -87,6 +87,7 @@ def n_layer_discriminator(input_nc=3, ndf=64, hidden_layers=2):
         ndf: filters of the first layer
     """
     inputs = Input(shape=(None, None, input_nc))
+    print('inputs', inputs.shape)
     x = inputs
     x = ZeroPadding2D(padding=(1, 1))(x)
     x = conv_block(x, ndf, 4, use_norm_layer=False, use_leaky_relu=True)
@@ -97,4 +98,5 @@ def n_layer_discriminator(input_nc=3, ndf=64, hidden_layers=2):
         x = ZeroPadding2D(padding=(1, 1))(x)
     x = conv2d(1, (4, 4), activation='sigmoid', strides=(1, 1))(x)
     outputs = x
+    print('outputs', outputs.shape)
     return Model(inputs=inputs, outputs=outputs)
