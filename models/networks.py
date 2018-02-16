@@ -19,7 +19,7 @@ def batchnorm():
 
 
 def conv_block(x, nf, size, stride=(2, 2), use_norm_layer=True, use_norm_instance=False,
-               use_activation_function=True, use_leaky_relu=True):
+               use_activation_function=True, use_leaky_relu=False):
     x = conv2d(nf, (size, size), strides=stride)(x)
     if use_norm_layer:
         if not use_norm_instance:
@@ -43,7 +43,7 @@ def res_block(ip, nf=256):
     return add([x, ip])
 
 
-def up_block(x, nf, size, use_conv_transpose=True, use_norm_instance=False):
+def up_block(x, nf, size, use_conv_transpose=False, use_norm_instance=False):
     if use_conv_transpose:
         x = Conv2DTranspose(nf, kernel_size=size, strides=2, padding='same',
                             use_bias=True if use_norm_instance else False,
@@ -87,11 +87,11 @@ def n_layer_discriminator(input_nc=3, ndf=64, hidden_layers=2):
     inputs = Input(shape=(None, None, input_nc))
     x = inputs
     x = ZeroPadding2D(padding=(1, 1))(x)
-    x = conv_block(x, ndf, 4, use_norm_layer=False)
+    x = conv_block(x, ndf, 4, use_norm_layer=False, use_leaky_relu=True)
     x = ZeroPadding2D(padding=(1, 1))(x)
     for i in range(1, hidden_layers + 1):
         nf = 2 ** i * ndf
-        x = conv_block(x, nf, 4)
+        x = conv_block(x, nf, 4, use_leaky_relu=True)
         x = ZeroPadding2D(padding=(1, 1))(x)
     x = conv2d(1, (4, 4), activation='sigmoid', strides=(1, 1))(x)
     outputs = x
