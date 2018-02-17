@@ -71,29 +71,30 @@ class KerasCycleGAN:
         return loss_D, loss_G, loss_cyc
 
     def G_A_forward(self, G_A, G_B):
-        # real_input = G_A.input[0]
-        real_input = self.real_A
-        print('-----G_A_forward-----')
-        print('-----real_input-----', real_input.shape)
-        # fake_output = G_A.output[0]
-        fake_output = G_B.predict(self.real_A)
-        print('-----fake_output-----', fake_output.shape)
-        rec_input = G_B.predict([fake_output])
-        print('-----rec_input-----', rec_input.shape)
+        real_input = G_A.input[0]
+        fake_output = G_A.output[0]
+        rec_input = G_B([fake_output])
+        # real_input = self.real_A
+        # print('-----G_A_forward-----')
+        # print('-----real_input-----', real_input.shape)
+        # fake_output = G_B.predict(self.real_A)
+        # print('-----fake_output-----', fake_output.shape)
+        # rec_input = G_B.predict([fake_output])
+        # print('-----rec_input-----', rec_input.shape)
         return real_input, fake_output, rec_input
 
     def G_B_forward(self, G_B, G_A):
-        # real_input = G_B.input[0]
-        # fake_output = G_B.output[0]
-        # rec_input = G_A([fake_output])
-        real_input = self.real_B
-        print('-----G_A_forward-----')
-        print('-----real_input-----', real_input.shape)
-        # fake_output = G_A.output[0]
-        fake_output = G_B.predict(self.real_B)
-        print('-----fake_output-----', fake_output.shape)
-        rec_input = G_B.predict([fake_output])
-        print('-----rec_input-----', rec_input.shape)
+        real_input = G_B.input[0]
+        fake_output = G_B.output[0]
+        rec_input = G_A([fake_output])
+        # real_input = self.real_B
+        # print('-----G_B_forward-----')
+        # print('-----real_input-----', real_input.shape)
+        # # fake_output = G_A.output[0]
+        # fake_output = G_B.predict(self.real_B)
+        # print('-----fake_output-----', fake_output.shape)
+        # rec_input = G_B.predict([fake_output])
+        # print('-----rec_input-----', rec_input.shape)
         return real_input, fake_output, rec_input
 
     def backward(self):
