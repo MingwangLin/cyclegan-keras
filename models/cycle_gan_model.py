@@ -115,7 +115,6 @@ class KerasCycleGAN:
         weights_D = self.D_A.trainable_weights + self.D_B.trainable_weights
         weights_G = self.G_A.trainable_weights + self.G_B.trainable_weights
         print('-----beta1-----', self.opt.beta1)
-        print('-----weights_D-----', weights_D, weights_G)
         print('-----lr-----', self.opt.lr)
         print('-----loss_D-----', loss_DA, loss_DB)
         training_updates = Adam(lr=self.opt.lr, beta_1=self.opt.beta1).get_updates(weights_D, [], loss_D)
