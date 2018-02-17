@@ -65,6 +65,7 @@ class KerasCycleGAN:
         # GAN loss D
         loss_D_real = self.loss_function_lsgan(output_real, K.ones_like(output_real))
         loss_D_fake = self.loss_function_lsgan(output_fake, K.zeros_like(output_fake))
+        print('-----loss_D_fake-----', loss_D_real, loss_D_fake)
         loss_D = loss_D_real + loss_D_fake
         # GAN loss G
         loss_G = self.loss_function_lsgan(output_fake, K.ones_like(output_fake))
