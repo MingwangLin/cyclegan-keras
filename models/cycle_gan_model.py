@@ -34,11 +34,11 @@ class KerasCycleGAN:
         self.image_paths = input['A_paths' if AtoB else 'B_paths']
 
     def test(self):
-        fake_B = self.netG_A(self.real_A)
-        self.rec_A = self.netG_B(fake_B)
+        fake_B = self.netG_A.predict(self.real_A)
+        self.rec_A = self.netG_B.predict(fake_B)
 
-        fake_A = self.netG_B(self.real_B)
-        self.rec_B = self.netG_A(fake_A)
+        fake_A = self.netG_B.predict(self.real_B)
+        self.rec_B = self.netG_A.predict(fake_A)
 
     # get image paths
     def get_image_paths(self):
@@ -68,17 +68,20 @@ class KerasCycleGAN:
         return loss_D, loss_G, loss_cyc
 
     def G_A_forward(self, G_A, G_B):
-        real_input = G_A.input[0]
-        fake_output = G_A.output[0]
-        print('--------fake_output---------', fake_output)
-        print('--------real-A---------', self.real_A)
+        # real_input = G_A.input[0]
+        real_input = self.real_A
+        print('real_input', real_input.shape)
+        print('--------real_input---------', self.real_input)
+        # fake_output = G_A.output[0]
+        fake_output = G_B.predict(self.real_A)
+        print('fake_output', fake_output.shape)
+        print('--------fake_output----', fake_output)
         rec_input = G_B([fake_output])
         print('---------hit---------')
         return real_input, fake_output, rec_input
 
     def G_B_forward(self, G_B, G_A):
         real_input = G_B.input[0]
-        # print('real_input', real_input.shape)
         fake_output = G_B.output[0]
         rec_input = G_A([fake_output])
         return real_input, fake_output, rec_input
