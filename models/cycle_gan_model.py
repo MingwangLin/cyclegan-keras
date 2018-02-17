@@ -114,7 +114,7 @@ class KerasCycleGAN:
         weights_D = self.D_A.trainable_weights + self.D_B.trainable_weights
         weights_G = self.G_A.trainable_weights + self.G_B.trainable_weights
 
-        training_updates = Adam(lr=self.opt.lr, beta1=self.opt.beta1).get_updates(weights_D, [], loss_D)
+        training_updates = Adam(lr=self.opt.lr, beta_1=self.opt.beta1).get_updates(weights_D, [], loss_D)
         D_backward = K.function([real_A, real_B], [loss_DA / 2, loss_DB / 2], training_updates)
 
         training_updates = Adam(lr=self.opt.lr, beta_1=self.opt.beta1).get_updates(weights_G, [], loss_G)
