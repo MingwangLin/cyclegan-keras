@@ -59,6 +59,8 @@ class KerasCycleGAN:
     def loss(self, net_D, real, fake, rec):
         output_real = net_D([real])
         output_fake = net_D([fake])
+        output_real = net_D.predict([real])
+        output_fake = net_D.predict([fake])
         # GAN loss D
         loss_D_real = self.loss_function_lsgan(output_real, K.ones_like(output_real))
         loss_D_fake = self.loss_function_lsgan(output_fake, K.zeros_like(output_fake))
@@ -74,27 +76,27 @@ class KerasCycleGAN:
         real_input = G_A.input[0]
         fake_output = G_A.output[0]
         rec_input = G_B([fake_output])
-        # real_input = self.real_A
-        # print('-----G_A_forward-----')
-        # print('-----real_input-----', real_input.shape)
-        # fake_output = G_B.predict(self.real_A)
-        # print('-----fake_output-----', fake_output.shape)
-        # rec_input = G_B.predict([fake_output])
-        # print('-----rec_input-----', rec_input.shape)
+        real_input = self.real_A
+        print('-----G_A_forward-----')
+        print('-----real_input-----', real_input.shape)
+        fake_output = G_B.predict(self.real_A)
+        print('-----fake_output-----', fake_output.shape)
+        rec_input = G_B.predict([fake_output])
+        print('-----rec_input-----', rec_input.shape)
         return real_input, fake_output, rec_input
 
     def G_B_forward(self, G_B, G_A):
-        real_input = G_B.input[0]
-        fake_output = G_B.output[0]
-        rec_input = G_A([fake_output])
-        # real_input = self.real_B
-        # print('-----G_B_forward-----')
-        # print('-----real_input-----', real_input.shape)
-        # # fake_output = G_A.output[0]
-        # fake_output = G_B.predict(self.real_B)
-        # print('-----fake_output-----', fake_output.shape)
-        # rec_input = G_B.predict([fake_output])
-        # print('-----rec_input-----', rec_input.shape)
+        # real_input = G_B.input[0]
+        # fake_output = G_B.output[0]
+        # rec_input = G_A([fake_output])
+        real_input = self.real_B
+        print('-----G_B_forward-----')
+        print('-----real_input-----', real_input.shape)
+        # fake_output = G_A.output[0]
+        fake_output = G_B.predict(self.real_B)
+        print('-----fake_output-----', fake_output.shape)
+        rec_input = G_B.predict([fake_output])
+        print('-----rec_input-----', rec_input.shape)
         return real_input, fake_output, rec_input
 
     def backward(self):
