@@ -57,8 +57,8 @@ class KerasCycleGAN:
         return result
 
     def loss(self, net_D, real, fake, rec):
-        output_real = net_D([real])
-        output_fake = net_D([fake])
+        # output_real = net_D([real])
+        # output_fake = net_D([fake])
         output_real = net_D.predict([real])
         output_fake = net_D.predict([fake])
         # GAN loss D
