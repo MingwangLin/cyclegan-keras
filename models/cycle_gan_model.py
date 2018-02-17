@@ -3,6 +3,7 @@ import os
 import itertools
 import sys
 import util.util as util
+import numpy as np
 import keras.backend as K
 from collections import OrderedDict
 from .networks import resnet_generator, n_layer_discriminator
@@ -26,10 +27,12 @@ class KerasCycleGAN:
     def set_input(self, input):
         AtoB = self.opt.which_direction == 'AtoB'
         input_A = input['A' if AtoB else 'B']
-        input_B = input['B' if AtoB else 'A']
         input_A = input_A.numpy().astype('float32')
-        input_B = input_B.numpy().astype('float32')
+        input_A = np.moveaxis(input_A, -1, 1)
         self.real_A = input_A
+        input_B = input['B' if AtoB else 'A']
+        input_B = input_B.numpy().astype('float32')
+        input_B = np.moveaxis(input_B, -1, 1)
         self.real_B = input_B
         self.image_paths = input['A_paths' if AtoB else 'B_paths']
 
