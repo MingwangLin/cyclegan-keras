@@ -28,11 +28,11 @@ class KerasCycleGAN:
         AtoB = self.opt.which_direction == 'AtoB'
         input_A = input['A' if AtoB else 'B']
         input_A = input_A.numpy().astype('float32')
-        input_A = np.moveaxis(input_A, -1, 1)
+        input_A = np.moveaxis(input_A, 1, -1)
         self.real_A = input_A
         input_B = input['B' if AtoB else 'A']
         input_B = input_B.numpy().astype('float32')
-        input_B = np.moveaxis(input_B, -1, 1)
+        input_B = np.moveaxis(input_B, 1, -1)
         self.real_B = input_B
         self.image_paths = input['A_paths' if AtoB else 'B_paths']
 
