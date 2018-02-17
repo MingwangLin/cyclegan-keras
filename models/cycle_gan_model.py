@@ -124,6 +124,7 @@ class KerasCycleGAN:
 
     def optimize_parameters(self):
         G_backward, D_backward = self.backward()
+        print('-----hit-----')
         self.loss_G_A, self.loss_G_B, loss_cycle = G_backward([self.real_A, self.real_B])
         self.loss_D_A, self.loss_D_B = D_backward([self.real_A, self.real_B])
 
