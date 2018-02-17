@@ -53,7 +53,7 @@ class KerasCycleGAN:
         return result
 
     def loss_function_lsgan(self, output, target):
-        print('output - target', (output - target).shape, (K.square(output - target)).shape)
+        print('output - target', (output - target).shape, K.mean(K.abs(K.square(output - target))).shape)
         result = K.mean(K.abs(K.square(output - target)))
         return result
 
