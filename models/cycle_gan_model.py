@@ -71,7 +71,7 @@ class KerasCycleGAN:
         # real_input = G_A.input[0]
         real_input = self.real_A
         print('real_input', real_input.shape)
-        print('--------real_input---------', self.real_input)
+        print('--------real_input---------', real_input)
         # fake_output = G_A.output[0]
         fake_output = G_B.predict(self.real_A)
         print('fake_output', fake_output.shape)
