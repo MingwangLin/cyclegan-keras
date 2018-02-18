@@ -19,9 +19,10 @@ class KerasCycleGAN:
         BaseModel.initialize(self, opt)
         self.G_B = resnet_generator()
         self.G_A = resnet_generator()
-
+        print('GB, GA', self.G_B.summary(), self.G_A.summary())
         self.D_B = n_layer_discriminator()
         self.D_A = n_layer_discriminator()
+        print('DB, DA', self.D_B.summary(), self.D_A.summary())
         self.save_dir = os.path.join(opt.checkpoints_dir, opt.name)
 
     def set_input(self, input):
