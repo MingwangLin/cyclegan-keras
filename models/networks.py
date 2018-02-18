@@ -81,12 +81,12 @@ def resnet_generator(img_size=256, input_nc=3, res_blocks=9):
 
 
 # Defines the PatchGAN discriminator
-def n_layer_discriminator(input_nc=3, ndf=64, hidden_layers=2):
+def n_layer_discriminator(img_size=256, input_nc=3, ndf=64, hidden_layers=2):
     """
         input_nc: input channels
         ndf: filters of the first layer
     """
-    inputs = Input(shape=(None, None, input_nc))
+    inputs = Input(shape=(img_size, img_size, input_nc))
     print('inputs', inputs.shape)
     x = inputs
     x = ZeroPadding2D(padding=(1, 1))(x)
