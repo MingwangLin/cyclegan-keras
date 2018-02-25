@@ -84,7 +84,7 @@ def n_layer_discriminator(img_size=256, input_nc=3, ndf=64, hidden_layers=2):
     x = inputs
 
     x = ZeroPadding2D(padding=(1, 1))(x)
-    x = conv_block(x, ndf, 4, use_norm_layer=False, use_leaky_relu=True, padding='valid')
+    x = conv_block(x, ndf, 4, has_norm_layer=False, use_leaky_relu=True, padding='valid')
 
     x = ZeroPadding2D(padding=(1, 1))(x)
     for i in range(1, hidden_layers + 1):
@@ -96,4 +96,3 @@ def n_layer_discriminator(img_size=256, input_nc=3, ndf=64, hidden_layers=2):
     outputs = x
 
     return Model(inputs=[inputs], outputs=outputs)
-    return Model(inputs=inputs, outputs=outputs)
