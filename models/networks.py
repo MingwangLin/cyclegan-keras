@@ -1,9 +1,7 @@
-import keras.backend as K
-from keras.models import Sequential, Model
+from keras.models import Model
 from keras.layers import Conv2D, ZeroPadding2D, BatchNormalization, Input, Dropout
-from keras.layers import UpSampling2D, Conv2DTranspose, Reshape, Activation, Cropping2D, Flatten, Add
+from keras.layers import UpSampling2D, Conv2DTranspose, Activation, Add
 from keras.layers.advanced_activations import LeakyReLU
-from keras.activations import relu
 from keras.initializers import RandomNormal
 from keras_contrib.layers.normalization import InstanceNormalization
 
