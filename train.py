@@ -1,44 +1,63 @@
 import time
 from options.train_options import TrainOptions
-from data.data_loader import CreateDataLoader
-from models.models import create_model
+from data.data_loader import load_data, minibatchAB
+from models.loss import get_training_process
+from models.networks import resnet_generator, n_layer_discriminator
 
 opt = TrainOptions().parse()
-data_loader = CreateDataLoader(opt)
-dataset = data_loader.load_data()
-dataset_size = len(data_loader)
-print('#training images = %d' % dataset_size)
 
-model = create_model(opt)
+train_A = load_data(opt.dataroot + 'trainA/*')
+train_B = load_data(opt.dataroot + 'trainB/*')
+print('#training images = {}'.format(len(train_A)))
+train_batch = minibatchAB(train_A, train_B, opt.batchSize)
+
+netGB = resnet_generator()
+netGA = resnet_generator()
+netGA.summary()
+
+netDA = n_layer_discriminator()
+netDB = n_layer_discriminator()
+netDA.summary()
+
+netD_train, netG_train = get_training_process(netGA, netGB, netDA, netDB)
+
 total_steps = 0
+epoch_count = 0
+errCyc_sum = errGA_sum = errGB_sum = errDA_sum = errDB_sum = 0
+save_latest_freq = opt.save_latest_freq
 
-for epoch in range(opt.epoch_count, opt.niter + opt.niter_decay + 1):
-    epoch_start_time = time.time()
-    epoch_iter = 0
+while epoch_count < opt.niter:
+    time_start = time.time()
 
-    for i, data in enumerate(dataset):
-        iter_start_time = time.time()
-        total_steps += opt.batchSize
-        epoch_iter += opt.batchSize
-        model.set_input(data)
-        model.optimize_parameters()
+    epoch_count, A, B = next(train_batch)
 
-        if total_steps % opt.display_freq == 0:
-            save_result = total_steps % opt.update_html_freq == 0
+    errDA, errDB = netD_train([A, B, 1])
+    errDA_sum += errDA
+    errDB_sum += errDB
 
-        if total_steps % opt.print_freq == 0:
-            errors = model.get_current_errors()
-            t = (time.time() - iter_start_time) / opt.batchSize
+    errGA, errGB, errCyc = netG_train([A, B, 1])
+    errGA_sum += errGA
+    errGB_sum += errGB
+    errCyc_sum += errCyc
+    total_steps += 1
+    if total_steps % save_latest_freq == 0:
+        print('[%d/%d][%d] Loss_D: %f %f Loss_G: %f %f loss_cyc %f'
+              % (epoch_count, opt.niter, total_steps, errDA_sum / save_latest_freq, errDB_sum / save_latest_freq,
+                 errGA_sum / save_latest_freq, errGB_sum / save_latest_freq,
+                 errCyc_sum / save_latest_freq), time.time() - time_start)
 
-        if total_steps % opt.save_latest_freq == 0:
-            print('saving the latest model (epoch %d, total_steps %d)' %
-                  (epoch, total_steps))
-            model.save(epoch, total_steps)
+        save_name = opt.dataroot + '{}' + str(total_steps) + '{}'
 
-    if epoch % opt.save_epoch_freq == 0:
-        print('saving the model at the end of epoch %d, iters %d' %
-              (epoch, total_steps))
-        model.save(epoch, total_steps)
+        netGA.save(save_name.format('tf_GA', '.h5'))
+        netGA.save_weights(save_name.format('tf_GA_weights', '.h5'))
 
-    print('End of epoch %d / %d \t Time Taken: %d sec' %
-          (epoch, opt.niter + opt.niter_decay, time.time() - epoch_start_time))
+        netGB.save(save_name.format('tf_GB', '.h5'))
+        netGB.save_weights(save_name.format('tf_GB_weights', '.h5'))
+
+        netDA.save(save_name.format('tf_DA', '.h5'))
+        netDA.save_weights(save_name.format('tf_DA_weights', '.h5'))
+
+        netDB.save(save_name.format('tf_DB', '.h5'))
+        netDB.save_weights(save_name.format('tf_DB_weights', '.h5'))
+
+        errCyc_sum = errGA_sum = errGB_sum = errDA_sum = errDB_sum = 0
