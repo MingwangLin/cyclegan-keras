@@ -31,11 +31,11 @@ def conv_block(x, filters, size, stride=(2, 2), has_norm_layer=True, use_norm_in
     return x
 
 
-def res_block(ip, filters=256):
-    x = conv_block(ip, filters, 3, (1, 1))
-    x = Dropout(0.5)(x)
-    x = conv_block(x, filters, 3, (1, 1), has_activation_layer=False)
-    return Add()([x, ip])
+def res_block(x, filters=256):
+    y = conv_block(x, filters, 3, (1, 1))
+    y = Dropout(0.5)(y)
+    y = conv_block(y, filters, 3, (1, 1), has_activation_layer=False)
+    return Add()([y, x])
 
 
 def up_block(x, filters, size, use_conv_transpose=False, use_norm_instance=False):
