@@ -54,9 +54,8 @@ def up_block(x, filters, size, use_conv_transpose=False, use_norm_instance=False
 
 
 # Defines the Resnet generator
-def resnet_generator(img_size=256, input_nc=3, res_blocks=6):
-
-    inputs = Input(shape=(img_size, img_size, input_nc))
+def resnet_generator(image_size=256, input_nc=3, res_blocks=6):
+    inputs = Input(shape=(image_size, image_size, input_nc))
     x = inputs
 
     x = conv_block(x, 64, 7, (1, 1))
@@ -72,16 +71,16 @@ def resnet_generator(img_size=256, input_nc=3, res_blocks=6):
     x = conv2d(3, (7, 7), activation='tanh', strides=(1, 1), padding='same')(x)
     outputs = x
 
-    return Model(inputs=inputs, outputs=outputs)
+    return Model(inputs=inputs, outputs=outputs), inputs, outputs
 
 
 # Defines the PatchGAN discriminator
-def n_layer_discriminator(img_size=256, input_nc=3, ndf=64, hidden_layers=2):
+def n_layer_discriminator(image_size=256, input_nc=3, ndf=64, hidden_layers=3):
     """
         input_nc: input channels
         ndf: filters of the first layer
     """
-    inputs = Input(shape=(img_size, img_size, input_nc))
+    inputs = Input(shape=(image_size, image_size, input_nc))
     x = inputs
 
     x = ZeroPadding2D(padding=(1, 1))(x)
@@ -96,4 +95,4 @@ def n_layer_discriminator(img_size=256, input_nc=3, ndf=64, hidden_layers=2):
     x = conv2d(1, (4, 4), activation='sigmoid', strides=(1, 1))(x)
     outputs = x
 
-    return Model(inputs=inputs, outputs=outputs)
+    return Model(inputs=[inputs], outputs=outputs), inputs, outputs

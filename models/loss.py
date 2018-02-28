@@ -1,15 +1,19 @@
 import keras.backend as K
-from keras.optimizers import Adam
-from .networks import resnet_generator, n_layer_discriminator
 
 
-def get_loss_fn(use_lsgan=True):
+def criterion_GAN(output, target, use_lsgan=True):
     if use_lsgan:
-        loss_fn = lambda output, target: K.mean(K.abs(K.square(output - target)))
+        diff = output - target
+        dims = list(range(1, K.ndim(diff)))
+        return K.expand_dims((K.mean(diff ** 2, dims)), 0)
     else:
-        loss_fn = lambda output, target: -K.mean(
-            K.log(output + 1e-12) * target + K.log(1 - output + 1e-12) * (1 - target))
-    return loss_fn
+        return K.mean(K.log(output + 1e-12) * target + K.log(1 - output + 1e-12) * (1 - target))
+
+
+def criterion_cycle(rec, real):
+    diff = K.abs(rec - real)
+    dims = list(range(1, K.ndim(diff)))
+    return K.expand_dims((K.mean(diff, dims)), 0)
 
 
 def get_model_variables(netG1, netG2):
@@ -20,42 +24,32 @@ def get_model_variables(netG1, netG2):
     return real_input, fake_output, rec_input, compute_model_output
 
 
-def get_loss_values(netD, real, fake, rec):
-    output_real = netD([real])
-    output_fake = netD([fake])
+def netG_loss(G_tensors, loss_weight=10):
 
-    loss_fn = get_loss_fn()
-    loss_D_real = loss_fn(output_real, K.ones_like(output_real))
-    loss_D_fake = loss_fn(output_fake, K.zeros_like(output_fake))
-    loss_G = loss_fn(output_fake, K.ones_like(output_fake))
+    netD_A_pred_fake, rec_A, G_A_input, netD_B_pred_fake, rec_B, G_B_input = G_tensors
 
-    loss_D = loss_D_real + loss_D_fake
-    loss_cyc = K.mean(K.abs(rec - real))
-    return loss_D, loss_G, loss_cyc
+    loss_G_B = criterion_GAN(netD_A_pred_fake, K.ones_like(netD_A_pred_fake))
+    loss_cyc_A = criterion_cycle(rec_A, G_A_input)
+
+    loss_G_A = criterion_GAN(netD_B_pred_fake, K.ones_like(netD_B_pred_fake))
+    loss_cyc_B = criterion_cycle(rec_B, G_B_input)
+
+    loss_G = loss_G_A + loss_G_B + loss_weight * (loss_cyc_A + loss_cyc_B)
+
+    return loss_G
 
 
-def get_training_process(netGA, netGB, netDA, netDB, use_lsgan=True, lr=2e-4, beta1=0.5):
-    if use_lsgan:
-        lambda_param = 10
-    else:
-        lambda_param = 100
+def netD_real_loss(D_pred):
 
-    real_A, fake_B, rec_A, _ = get_model_variables(netGA, netGB)
-    real_B, fake_A, rec_B, _ = get_model_variables(netGB, netGA)
+    loss_D_real = criterion_GAN(D_pred, K.ones_like(D_pred))
+    loss_D_real = (1 / 2) * loss_D_real
 
-    loss_DA, loss_GB, loss_cycB = get_loss_values(netDA, real_A, fake_A, rec_A)
-    loss_DB, loss_GA, loss_cycA = get_loss_values(netDB, real_B, fake_B, rec_B)
-    loss_cyc = loss_cycB + loss_cycA
+    return loss_D_real
 
-    loss_G = loss_GB + loss_GA + lambda_param * loss_cyc
-    loss_D = loss_DA + loss_DB
 
-    weightsD = netDA.trainable_weights + netDB.trainable_weights
-    weightsG = netGB.trainable_weights + netGA.trainable_weights
+def netD_fake_loss(D_pred):
 
-    training_updates = Adam(lr=lr, beta_1=beta1).get_updates(weightsD, [], loss_D)
-    netD_train = K.function([real_A, real_B, K.learning_phase()], [loss_DA / 2, loss_DB / 2], training_updates)
+    loss_D_fake = criterion_GAN(D_pred, K.zeros_like(D_pred))
+    loss_D_fake = (1 / 2) * loss_D_fake
 
-    training_updates = Adam(lr=lr, beta_1=beta1).get_updates(weightsG, [], loss_G)
-    netG_train = K.function([real_A, real_B, K.learning_phase()], [loss_GB, loss_GA, loss_cyc], training_updates)
-    return netD_train, netG_train
+    return loss_D_fake
