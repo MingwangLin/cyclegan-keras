@@ -1,3 +1,4 @@
+import keras.backend as K
 from keras.models import Model
 from keras.layers import Conv2D, ZeroPadding2D, BatchNormalization, Input, Dropout
 from keras.layers import UpSampling2D, Conv2DTranspose, Activation, Add
@@ -96,3 +97,11 @@ def n_layer_discriminator(image_size=256, input_nc=3, ndf=64, hidden_layers=3):
     outputs = x
 
     return Model(inputs=[inputs], outputs=outputs), inputs, outputs
+
+
+def cycle_generater(netG_alpha, netG_beta):
+    real_input = netG_alpha.inputs[0]
+    fake_output = netG_alpha.outputs[0]
+    rec_input = netG_beta([fake_output])
+    generater = K.function([real_input, K.learning_phase()], [fake_output, rec_input])
+    return generater

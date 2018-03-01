@@ -32,12 +32,12 @@ def try_read_img(data, index):
         try_read_img(data, index + 1)
 
 
-def minibatch(data, batchsize):
+def minibatch(data, batch_size):
     length = len(data)
     epoch = i = 0
     tmpsize = None
     while True:
-        size = tmpsize if tmpsize else batchsize
+        size = tmpsize if tmpsize else batch_size
         if i + size > length:
             shuffle(data)
             i = 0
@@ -51,9 +51,9 @@ def minibatch(data, batchsize):
         tmpsize = yield epoch, np.float32(rtn)
 
 
-def minibatchAB(dataA, dataB, batchsize):
-    batchA = minibatch(dataA, batchsize)
-    batchB = minibatch(dataB, batchsize)
+def minibatchAB(dataA, dataB, batch_size):
+    batchA = minibatch(dataA, batch_size)
+    batchB = minibatch(dataB, batch_size)
     tmpsize = None
     while True:
         ep1, A = batchA.send(tmpsize)

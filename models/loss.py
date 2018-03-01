@@ -16,22 +16,13 @@ def criterion_cycle(rec, real):
     return K.expand_dims((K.mean(diff, dims)), 0)
 
 
-def get_model_variables(netG1, netG2):
-    real_input = netG1.inputs[0]
-    fake_output = netG1.outputs[0]
-    rec_input = netG2([fake_output])
-    compute_model_output = K.function([real_input, K.learning_phase()], [fake_output, rec_input])
-    return real_input, fake_output, rec_input, compute_model_output
-
-
 def netG_loss(G_tensors, loss_weight=10):
+    netD_A_predictict_fake, rec_A, G_A_input, netD_B_predict_fake, rec_B, G_B_input = G_tensors
 
-    netD_A_pred_fake, rec_A, G_A_input, netD_B_pred_fake, rec_B, G_B_input = G_tensors
-
-    loss_G_B = criterion_GAN(netD_A_pred_fake, K.ones_like(netD_A_pred_fake))
+    loss_G_B = criterion_GAN(netD_A_predict_fake, K.ones_like(netD_A_predict_fake))
     loss_cyc_A = criterion_cycle(rec_A, G_A_input)
 
-    loss_G_A = criterion_GAN(netD_B_pred_fake, K.ones_like(netD_B_pred_fake))
+    loss_G_A = criterion_GAN(netD_B_predict_fake, K.ones_like(netD_B_predict_fake))
     loss_cyc_B = criterion_cycle(rec_B, G_B_input)
 
     loss_G = loss_G_A + loss_G_B + loss_weight * (loss_cyc_A + loss_cyc_B)
@@ -39,17 +30,11 @@ def netG_loss(G_tensors, loss_weight=10):
     return loss_G
 
 
-def netD_real_loss(D_pred):
+def netD_loss(netD_predict):
+    netD_predict_real, netD_predict_fake = netD_predict
 
-    loss_D_real = criterion_GAN(D_pred, K.ones_like(D_pred))
-    loss_D_real = (1 / 2) * loss_D_real
+    netD_loss_real = criterion_GAN(netD_predict_real, K.ones_like(netD_predict_real))
+    netD_loss_fake = criterion_GAN(netD_predict_fake, K.zeros_like(netD_predict_fake))
 
-    return loss_D_real
-
-
-def netD_fake_loss(D_pred):
-
-    loss_D_fake = criterion_GAN(D_pred, K.zeros_like(D_pred))
-    loss_D_fake = (1 / 2) * loss_D_fake
-
-    return loss_D_fake
+    loss_netD = (1 / 2) * (netD_loss_real + netD_loss_fake)
+    return loss_netD

@@ -1,63 +1,101 @@
 import time
+import numpy as np
+from IPython.display import clear_output
 from options.train_options import TrainOptions
 from data.data_loader import load_data, minibatchAB
-from models.loss import get_training_process
-from models.networks import resnet_generator, n_layer_discriminator
+from data.data_display import show_generator_image
+from models.train_function import get_train_function
+from models.networks import resnet_generator, n_layer_discriminator, cycle_generater
+from models.loss import netG_loss, netD_loss
+from keras.layers import Input
 
 opt = TrainOptions().parse()
 
+# load data
 train_A = load_data(opt.dataroot + 'trainA/*')
 train_B = load_data(opt.dataroot + 'trainB/*')
 print('#training images = {}'.format(len(train_A)))
-train_batch = minibatchAB(train_A, train_B, opt.batchSize)
+train_batch = minibatchAB(train_A, train_B, opt.batch_size)
 
-netGB = resnet_generator()
-netGA = resnet_generator()
-netGA.summary()
+# create gennerator models
+netG_A, netG_A_real_A, netG_A_fake_B = resnet_generator()
+netG_B, netG_B_real_B, netG_B_fake_A = resnet_generator()
+netG_A.summary()
 
-netDA = n_layer_discriminator()
-netDB = n_layer_discriminator()
-netDA.summary()
+# create discriminator models
+netD_A = n_layer_discriminator()
+netD_B = n_layer_discriminator()
+netD_A.summary()
 
-netD_train, netG_train = get_training_process(netGA, netGB, netDA, netDB)
+# create generator train function
+netD_A_predict_netG_fake = netD_A(netG_B_fake_A)
+netD_B_predict_netG_fake = netD_B(netG_A_fake_B)
+rec_A = netG_B(netG_A_fake_B)
+rec_B = netG_A(netG_B_fake_A)
+lambda_layer_inputs = [netD_A_predict_netG_fake, rec_A, netG_A_real_A, netD_B_predict_netG_fake, rec_B, netG_B_real_B]
+netG_train_function = get_train_function(inputs=[netG_A_real_A, netG_B_real_B], loss_function=netG_loss,
+                                         lambda_layer_inputs=lambda_layer_inputs)
 
-total_steps = 0
-epoch_count = 0
-errCyc_sum = errGA_sum = errGB_sum = errDA_sum = errDB_sum = 0
-save_latest_freq = opt.save_latest_freq
 
-while epoch_count < opt.niter:
-    time_start = time.time()
+# create discriminator A train function
+image_size = opt.fine_size
+input_nc = opt.input_nc
 
-    epoch_count, A, B = next(train_batch)
+real_A = Input(shape=(image_size, image_size, input_nc))
+fake_A = Input(shape=(image_size, image_size, input_nc))
+netD_A_predict_real = netD_A(real_A)
+netD_A_predict_fake = netD_A(fake_A)
+lambda_layer_inputs = [netD_A_predict_real, netD_A_predict_fake]
+netD_A_train_function = get_train_function(inputs=[real_A, fake_A], loss_function=netD_loss,
+                                           lambda_layer_inputs=lambda_layer_inputs)
+# create discriminator B train function
+real_B = Input(shape=(image_size, image_size, input_nc))
+fake_B = Input(shape=(image_size, image_size, input_nc))
+netD_B_predict_real = netD_B(real_B)
+netD_B_predict_fake = netD_B(fake_B)
+lambda_layer_inputs = [netD_B_predict_real, netD_B_predict_fake]
+netD_B_train_function = get_train_function(inputs=[real_B, fake_B], loss_function=netD_loss,
+                                           lambda_layer_inputs=lambda_layer_inputs)
 
-    errDA, errDB = netD_train([A, B, 1])
-    errDA_sum += errDA
-    errDB_sum += errDB
 
-    errGA, errGB, errCyc = netG_train([A, B, 1])
-    errGA_sum += errGA
-    errGB_sum += errGB
-    errCyc_sum += errCyc
-    total_steps += 1
-    if total_steps % save_latest_freq == 0:
-        print('[%d/%d][%d] Loss_D: %f %f Loss_G: %f %f loss_cyc %f'
-              % (epoch_count, opt.niter, total_steps, errDA_sum / save_latest_freq, errDB_sum / save_latest_freq,
-                 errGA_sum / save_latest_freq, errGB_sum / save_latest_freq,
-                 errCyc_sum / save_latest_freq), time.time() - time_start)
+# train loop
+path = opt.dataroot
+time_start = time.time()
+niter = 5
+gen_iterations = 0
+epoch = 0
+batch_size = 1
+display_iters = 5000
+# val_batch = minibatch(valAB, 6, direction)
+train_batch = minibatchAB(train_A, train_B, batch_size)
 
-        save_name = opt.dataroot + '{}' + str(total_steps) + '{}'
+while epoch < niter:
+    target_label = np.zeros((batch_size, 1))
+    epoch, real_A, real_B = next(train_batch)
 
-        netGA.save(save_name.format('tf_GA', '.h5'))
-        netGA.save_weights(save_name.format('tf_GA_weights', '.h5'))
+    netG_train_function.train_on_batch([real_A, real_B], target_label)
 
-        netGB.save(save_name.format('tf_GB', '.h5'))
-        netGB.save_weights(save_name.format('tf_GB_weights', '.h5'))
+    fake_B = netG_A.predictict(real_A)
+    fake_A = netG_B.predictict(real_B)
 
-        netDA.save(save_name.format('tf_DA', '.h5'))
-        netDA.save_weights(save_name.format('tf_DA_weights', '.h5'))
+    netD_A_train_function.train_on_batch([real_A, fake_A], target_label)
+    netD_B_train_function.train_on_batch([real_B, fake_B], target_label)
 
-        netDB.save(save_name.format('tf_DB', '.h5'))
-        netDB.save_weights(save_name.format('tf_DB_weights', '.h5'))
+    gen_iterations += 1
 
-        errCyc_sum = errGA_sum = errGB_sum = errDA_sum = errDB_sum = 0
+    if gen_iterations % display_iters == 0:
+        clear_output()
+        traintime = (time.time() - time_start) / gen_iterations
+        print('epoch: {}/{}  iter_count: {}  timecost/iter: {}s'.format(epoch, niter, gen_iterations, traintime))
+        _, A, B = train_batch.send(4)
+        show_generator_image(A, B, netG_A, netG_B)
+
+        save_name = path + '{}' + str(gen_iterations) + '{}'
+        netG_A.save(save_name.format('tf_GA', '.h5'))
+        netG_A.save_weights(save_name.format('tf_GA_weights', '.h5'))
+        netG_B.save(save_name.format('tf_GB', '.h5'))
+        netG_B.save_weights(save_name.format('tf_GB_weights', '.h5'))
+        netD_A.save(save_name.format('tf_DA', '.h5'))
+        netD_A.save_weights(save_name.format('tf_DA_weights', '.h5'))
+        netD_B.save(save_name.format('tf_DB', '.h5'))
+        netD_B.save_weights(save_name.format('tf_DB_weights', '.h5'))
