@@ -36,7 +36,6 @@ lambda_layer_inputs = [netD_A_predict_netG_fake, rec_A, netG_A_real_A, netD_B_pr
 netG_train_function = get_train_function(inputs=[netG_A_real_A, netG_B_real_B], loss_function=netG_loss,
                                          lambda_layer_inputs=lambda_layer_inputs)
 
-
 # create discriminator A train function
 image_size = opt.fine_size
 input_nc = opt.input_nc
@@ -56,6 +55,9 @@ netD_B_predict_fake = netD_B(fake_B)
 lambda_layer_inputs = [netD_B_predict_real, netD_B_predict_fake]
 netD_B_train_function = get_train_function(inputs=[real_B, fake_B], loss_function=netD_loss,
                                            lambda_layer_inputs=lambda_layer_inputs)
+# create fake_image and rec_image generator
+cycle_A_generater = cycle_generater(netG_A, netG_B)
+cycle_B_generater = cycle_generater(netG_B, netG_A)
 
 
 # train loop
@@ -66,12 +68,15 @@ gen_iterations = 0
 epoch = 0
 batch_size = 1
 display_iters = 5000
-# val_batch = minibatch(valAB, 6, direction)
+# val_batch = minibatch(val_A, val_B, batch_size)
 train_batch = minibatchAB(train_A, train_B, batch_size)
 
 while epoch < niter:
     target_label = np.zeros((batch_size, 1))
     epoch, real_A, real_B = next(train_batch)
+    # generate fake_A, fake_B
+    f_B = cycle_A_generater([A])[0]
+    f_A = cycle_B_generater([B])[0]
 
     netG_train_function.train_on_batch([real_A, real_B], target_label)
 
