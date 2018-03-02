@@ -1,13 +1,16 @@
 import time
 import numpy as np
+import keras.backend as K
 from IPython.display import clear_output
 from options.train_options import TrainOptions
 from data.data_loader import load_data, minibatchAB
 from data.data_display import show_generator_image
 from models.train_function import get_train_function
-from models.networks import resnet_generator, n_layer_discriminator, cycle_generater
+from models.networks import resnet_generator, n_layer_discriminator
 from models.loss import netG_loss, netD_loss
 from keras.layers import Input
+
+K.set_learning_phase(1)
 
 opt = TrainOptions().parse()
 
@@ -55,13 +58,10 @@ netD_B_predict_fake = netD_B(fake_B)
 lambda_layer_inputs = [netD_B_predict_real, netD_B_predict_fake]
 netD_B_train_function = get_train_function(inputs=[real_B, fake_B], loss_function=netD_loss,
                                            lambda_layer_inputs=lambda_layer_inputs)
-# create fake_image and rec_image generator
-cycle_A_generater = cycle_generater(netG_A, netG_B)
-cycle_B_generater = cycle_generater(netG_B, netG_A)
 
 
 # train loop
-path = opt.dataroot
+dpath = opt.dataroot
 time_start = time.time()
 niter = 5
 gen_iterations = 0
@@ -73,18 +73,14 @@ train_batch = minibatchAB(train_A, train_B, batch_size)
 
 while epoch < niter:
     target_label = np.zeros((batch_size, 1))
-    epoch, real_A, real_B = next(train_batch)
-    # generate fake_A, fake_B
-    f_B = cycle_A_generater([A])[0]
-    f_A = cycle_B_generater([B])[0]
+    epoch, A, B = next(train_batch)
 
-    netG_train_function.train_on_batch([real_A, real_B], target_label)
+    f_B = netG_A.predict(A)
+    f_A = netG_B.predict(B)
 
-    fake_B = netG_A.predictict(real_A)
-    fake_A = netG_B.predictict(real_B)
-
-    netD_A_train_function.train_on_batch([real_A, fake_A], target_label)
-    netD_B_train_function.train_on_batch([real_B, fake_B], target_label)
+    netG_train_function.train_on_batch([A, B], target_label)
+    netD_B_train_function.train_on_batch([B, f_B], target_label)
+    netD_A_train_function.train_on_batch([A, f_A], target_label)
 
     gen_iterations += 1
 
@@ -95,12 +91,20 @@ while epoch < niter:
         _, A, B = train_batch.send(4)
         show_generator_image(A, B, netG_A, netG_B)
 
-        save_name = path + '{}' + str(gen_iterations) + '{}'
-        netG_A.save(save_name.format('tf_GA', '.h5'))
-        netG_A.save_weights(save_name.format('tf_GA_weights', '.h5'))
-        netG_B.save(save_name.format('tf_GB', '.h5'))
-        netG_B.save_weights(save_name.format('tf_GB_weights', '.h5'))
-        netD_A.save(save_name.format('tf_DA', '.h5'))
-        netD_A.save_weights(save_name.format('tf_DA_weights', '.h5'))
-        netD_B.save(save_name.format('tf_DB', '.h5'))
-        netD_B.save_weights(save_name.format('tf_DB_weights', '.h5'))
+        save_name = dpath + '{}' + str(gen_iterations) + '.h5'
+
+        netG_A.save(save_name.format('tf_GA'))
+        netG_A.save_weights(save_name.format('tf_GA_weights'))
+        netG_B.save(save_name.format('tf_GB'))
+        netG_B.save_weights(save_name.format('tf_GB_weights'))
+        netD_A.save(save_name.format('tf_DA'))
+        netD_A.save_weights(save_name.format('tf_DA_weights'))
+        netD_B.save(save_name.format('tf_DB'))
+        netD_B.save_weights(save_name.format('tf_DB_weights'))
+
+        netG_train_function.save(save_name.format('tf_G_train'))
+        netG_train_function.save_weights(save_name.format('tf_G_train_weights'))
+        netD_A_train_function.save(save_name.format('tf_D_A_train'))
+        netD_A_train_function.save_weights(save_name.format('tf_D_A_train_weights'))
+        netD_B_train_function.save(save_name.format('tf_D_B_train'))
+        netD_B_train_function.save_weights(save_name.format('tf_D_B_train_weights'))
