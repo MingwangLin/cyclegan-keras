@@ -32,9 +32,10 @@ def conv_block(x, filters, size, stride=(2, 2), has_norm_layer=True, use_norm_in
     return x
 
 
-def res_block(x, filters=256):
+def res_block(x, filters=256, use_dropout=False):
     y = conv_block(x, filters, 3, (1, 1))
-    y = Dropout(0.5)(y)
+    if use_dropout:
+        y = Dropout(0.5)(y)
     y = conv_block(y, filters, 3, (1, 1), has_activation_layer=False)
     return Add()([y, x])
 
