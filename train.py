@@ -88,8 +88,7 @@ while epoch_count < how_many_epochs:
     if iteration_count % display_freq == 0:
         clear_output()
         traintime = (time.time() - time_start) / iteration_count
-        print('epoch_count: {}/{}  iter_count: {}  timecost/iter: {}s'.format(epoch_count, niter, iteration_count,
-                                                                              traintime))
+        print('epoch_count: {}  iter_count: {}  timecost/iter: {}s'.format(epoch_count, iteration_count, traintime))
         _, val_A, val_B = next(val_batch)
         show_generator_image(val_A, val_B, netG_A, netG_B)
 
