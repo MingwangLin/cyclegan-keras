@@ -41,6 +41,11 @@ netD_A_predict_fake = netD_A(fake_A)
 rec_B = netG_A(fake_A)
 lambda_layer_inputs = [netD_B_predict_fake, rec_A, real_A, netD_A_predict_fake, rec_B, real_B]
 
+for l in netD_A.layers:
+     l.trainable=False
+for l in netD_B.layers:
+     l.trainable=False
+
 netG_train_function = get_train_function(inputs=[real_A, real_B], loss_function=netG_loss,
                                          lambda_layer_inputs=lambda_layer_inputs)
 
@@ -48,9 +53,11 @@ netG_train_function = get_train_function(inputs=[real_A, real_B], loss_function=
 netD_A_predict_real = netD_A(real_A)
 
 for l in netG_A.layers:
-    l.trainable = False
+     l.trainable=False
 for l in netG_B.layers:
-    l.trainable = False
+     l.trainable=False
+for l in netD_A.layers:
+     l.trainable=True
 
 netD_A_train_function = get_train_function(inputs=[real_A, real_B], loss_function=netD_loss,
                                            lambda_layer_inputs=[netD_A_predict_real, netD_A_predict_fake])
@@ -61,8 +68,10 @@ for l in netG_A.layers:
      l.trainable=False
 for l in netG_B.layers:
      l.trainable=False
+for l in netD_B.layers:
+     l.trainable=True
 
-netD_B_train_function = get_train_function(inputs=[real_B, real_B], loss_function=netD_loss,
+netD_B_train_function = get_train_function(inputs=[real_A, real_B], loss_function=netD_loss,
                                            lambda_layer_inputs=[netD_B_predict_real, netD_B_predict_fake])
 
 # train loop
@@ -80,7 +89,6 @@ while epoch_count < how_many_epochs:
 
     netD_B_train_function.train_on_batch([A, B], target_label)
     netD_A_train_function.train_on_batch([A, B], target_label)
-
     netG_train_function.train_on_batch([A, B], target_label)
 
     iteration_count += 1
