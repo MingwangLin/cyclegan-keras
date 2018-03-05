@@ -99,3 +99,9 @@ def n_layer_discriminator(image_size=256, input_nc=3, ndf=64, hidden_layers=3):
 
     return Model(inputs=[inputs], outputs=outputs), inputs, outputs
 
+def get_generater_function(netG):
+    real_input = netG.inputs[0]
+    fake_output = netG.outputs[0]
+    function = K.function([real_input], [fake_output])
+    return function
+
