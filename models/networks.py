@@ -12,7 +12,7 @@ def conv2d(f, *a, **k):
 
 
 def batchnorm():
-    return BatchNormalization(momentum=0.9, axis=3, epsilon=1.01e-5,
+    return BatchNormalization(momentum=0.9, axis=3, epsilon=1e-5,
                               gamma_initializer=RandomNormal(1., 0.02))
 
 
