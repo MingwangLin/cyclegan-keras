@@ -122,8 +122,8 @@ while epoch_count < how_many_epochs:
     target_label = np.zeros((batch_size, 1))
     epoch_count, A, B = next(train_batch)
 
-    _fake_B = G_A_function([A])
-    _fake_A = G_B_functionr([B])
+    _fake_B = G_A_function([A])[0]
+    _fake_A = G_B_functionr([B])[0]
 
     netG_train_function.train_on_batch([A, B], target_label)
 
