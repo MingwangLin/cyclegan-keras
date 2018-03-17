@@ -8,3 +8,6 @@ def get_train_function(inputs, loss_function, lambda_layer_inputs):
     train_function = Model(inputs, Lambda(loss_function)(lambda_layer_inputs))
     train_function.compile('adam', 'mae')
     return train_function
+
+
+
