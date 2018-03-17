@@ -14,8 +14,8 @@ juyter notebook version tested OK on
 ## Demos [manga-colorization-demo](http://47.98.46.70) 
 
 Colorize manga with CNN model totally run in browser! 
-- built based on [Keras.js](https://github.com/transcranial/keras-js) and [keras.js demos](https://transcranial.github.io/keras-js)
-- model trained by juyter notebook version of this git repo. 
-- check my [demo-repo](https://github.com/MingwangLin/manga-colorization) for more details
+- Built based on [Keras.js](https://github.com/transcranial/keras-js) and [keras.js demos](https://transcranial.github.io/keras-js)
+- Model trained by juyter notebook version of this git repo 
+- Check my [demo-repo](https://github.com/MingwangLin/manga-colorization) 
 
 
