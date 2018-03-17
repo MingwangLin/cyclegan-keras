@@ -8,13 +8,12 @@ juyter notebook version tested OK on
 - Python 3.6
 - Keras 2.1.2
 - Tensorflow 1.0.1
-- NVIDIA GPU + CUDA8.0 CuDNN6
+- NVIDIA GPU + CUDA8.0 CuDNN6 or CuDNN5
 
 
-## Demos
+## Demos [manga-colorization-demo](http://47.98.46.70) 
 
-Colorize manga with CNN model totally run in browser! [manga-colorization-demo](http://47.98.46.70) 
-
+Colorize manga with CNN model totally run in browser! 
 - built based on [Keras.js](https://github.com/transcranial/keras-js) and [keras.js demos](https://transcranial.github.io/keras-js)
 - model trained by juyter notebook version of this git repo. 
 - check my [demo-repo](https://github.com/MingwangLin/manga-colorization) for more details
