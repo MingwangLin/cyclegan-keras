@@ -17,7 +17,7 @@ def criterion_cycle(rec, real):
 
 
 def netG_loss(G_tensors, loss_weight=10):
-    netD_A_predictict_fake, rec_A, G_A_input, netD_B_predict_fake, rec_B, G_B_input = G_tensors
+    netD_A_predict_fake, rec_A, G_A_input, netD_B_predict_fake, rec_B, G_B_input = G_tensors
 
     loss_G_B = criterion_GAN(netD_A_predict_fake, K.ones_like(netD_A_predict_fake))
     loss_cyc_A = criterion_cycle(rec_A, G_A_input)

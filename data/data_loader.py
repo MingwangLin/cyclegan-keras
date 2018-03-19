@@ -12,12 +12,12 @@ def read_image(img, loadsize=286, imagesize=256):
     img = Image.open(img).convert('RGB')
     img = img.resize((loadsize, loadsize), Image.BICUBIC)
     img = np.array(img)
+    assert img.shape == (loadsize, loadsize, 3)
     img = img.astype(np.float32)
-    img = img / 255
+    img = (img - 127.5) / 127.5
     # random jitter
     w_offset = h_offset = randint(0, max(0, loadsize - imagesize - 1))
-    img = img[h_offset:h_offset + imagesize,
-          w_offset:w_offset + imagesize, :]
+    img = img[h_offset:h_offset + imagesize, w_offset:w_offset + imagesize, :]
     # horizontal flip
     if randint(0, 1):
         img = img[:, ::-1]
@@ -34,8 +34,10 @@ def try_read_img(data, index):
 
 def minibatch(data, batch_size):
     length = len(data)
+    shuffle(data)
     epoch = i = 0
     tmpsize = None
+
     while True:
         size = tmpsize if tmpsize else batch_size
         if i + size > length:
@@ -46,7 +48,7 @@ def minibatch(data, batch_size):
         for j in range(i, i + size):
             img = try_read_img(data, j)
             rtn.append(img)
-
+        rtn = np.stack(rtn, axis=0)
         i += size
         tmpsize = yield epoch, np.float32(rtn)
 
