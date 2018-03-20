@@ -3,7 +3,7 @@
 keras implementation of cycle-gan based on [pytorch-CycleGan](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix) (by junyanz) and <a href="https://github.com/tjwei/GANotebooks">[tf/torch/keras/lasagne]</a> (by tjwei)
 
 ## Prerequisites
-train.py is not tested now, juyter notebook version CycleGAN-keras.ipynb is recommended and is tested OK on
+train.py has not been tested, CycleGAN-keras.ipynb is recommended and tested OK on
 - Ubuntu 16.04
 - Python 3.6
 - Keras 2.1.2
@@ -12,11 +12,11 @@ train.py is not tested now, juyter notebook version CycleGAN-keras.ipynb is reco
 
 
 
-## Demos [manga-colorization-demo](http://47.98.46.70) 
+## Demos [[manga-colorization-demo]](http://47.98.46.70) 
 
 Colorize manga with Cycle-GAN model totally run in browser.
 - Built based on [Keras.js](https://github.com/transcranial/keras-js) and [keras.js demos](https://transcranial.github.io/keras-js)
 - Model trained by juyter notebook version of this git repo
-- Check my [demo-repo](https://github.com/MingwangLin/manga-colorization) for more details
+- Check [Demo-Introduction](https://zhuanlan.zhihu.com/p/34672860) or my [demo-repo](https://github.com/MingwangLin/manga-colorization) for more details
 
 
