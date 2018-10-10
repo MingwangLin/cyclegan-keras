@@ -12,7 +12,7 @@ train.py has not been tested, CycleGAN-keras.ipynb is recommended and tested OK 
 
 
 
-## Demos [[manga-colorization-demo]](http://47.98.46.70) 
+## Demos [[manga-colorization-demo]](http://www.styletransfer.tech) 
 
 Colorize manga with Cycle-GAN model totally run in browser.
 - Built based on [Keras.js](https://github.com/transcranial/keras-js) and [keras.js demos](https://transcranial.github.io/keras-js)
